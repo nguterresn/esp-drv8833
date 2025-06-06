@@ -7,10 +7,8 @@ authors = ["nguterresn"]
 repository = "https://github.com/nguterresn/esp-drv8833"
 license = "MIT"
 readme = "README.md"
-
-[[bin]]
-name = "esp-drv8833"
-path = "./src/bin/main.rs"
+keywords = ["embedded", "no-std", "hal", "motor", "drv8833", "esp32"]
+categories = ["embedded", "hardware-support", "no-std"]
 
 [dependencies]
 critical-section = "1.2.0"
