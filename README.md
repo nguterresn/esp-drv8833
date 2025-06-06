@@ -2,10 +2,10 @@
 
 This crate provides control over the DRV8833 Dual H-Bridge Motor Driver.
 
-The crate requires no external or standard library and only depends on the esp-hal crate.
+The crate requires no external or standard library and only depends on the [esp-hal](https://github.com/esp-rs/esp-hal) crate.
 The code uses the espressif [LEDC](https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/peripherals/ledc.html) peripheral to control the DRV8833.
 
-The crate uses the slow clock as default:
+The crate uses the [slow clock](https://docs.espressif.com/projects/rust/esp-hal/1.0.0-beta.1/esp32c6/esp_hal/ledc/enum.LSGlobalClkSource.html) as default:
 
 * It is better suited for motor control, since the frenquency is quite low, e.g. < 20kHz.
 * It is more power efficient.
@@ -49,6 +49,6 @@ motor.brake()?;
 
 ### Setup a slow decay motor
 
-```rust 
+```rust
 let motor: MotorSlowDecay = Motor::new(&motor_conf, peripherals.GPIO1, peripherals.GPIO2)?;
 ```
