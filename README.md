@@ -1,3 +1,9 @@
+# Build
+
+```BASH
+cargo build --example forward --features esp32c6
+```
+
 # About
 
 This crate provides control over the DRV8833 Dual H-Bridge Motor Driver.
