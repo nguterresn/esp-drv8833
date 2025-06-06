@@ -28,18 +28,36 @@ impl From<esp_hal::ledc::timer::Error> for Error {
     }
 }
 
-#[derive(PartialEq)]
-pub enum MotorDecay {
-    FastDecay,
-    SlowDecay,
-}
-
 pub struct MotorConfig<'a> {
     timer: Timer<'a, LowSpeed>,
     ledc: &'a Ledc<'a>,
 }
 
 impl<'a> MotorConfig<'a> {
+    /// The Motor configuration requires the setting of the _slow clock_ in
+    /// the LEDC peripheral.
+    ///
+    /// ```rust
+    /// let mut ledc = Ledc::new(peripherals.LEDC);
+    /// ledc.set_global_slow_clock(LSGlobalClkSource::APBClk);
+    /// ```
+    ///
+    /// Create the motor configuration by setting:
+    ///
+    /// * The timer, e.g. Timer0, Timer1, etc
+    /// * The duty cycle resolution, e.g. 8 bits
+    /// * The timer frequency as a Rate type, e.g. Rate::from_khz(20)
+    ///
+    /// Example:
+    ///
+    /// ```rust
+    /// let motor_conf = MotorConfig::new(
+    ///     &ledc,
+    ///     timer::Number::Timer0,
+    ///     timer::config::Duty::Duty12Bit,
+    ///     Rate::from_khz(1),
+    /// )?;
+    /// ```
     pub fn new(
         ledc: &'a Ledc<'a>,
         timer: Number,
@@ -63,22 +81,31 @@ impl<'a> MotorConfig<'a> {
 pub struct Motor;
 
 impl Motor {
-    pub fn new<'a, M, A, B>(driver: &'a Driver, gpio_a: A, gpio_b: B) -> Result<M, Error>
+    /// This method links the motor configuration (MotorConfig) to the passed GPIOs, A and B.
+    ///
+    /// It returns a Motor that implements the MotorInterface trait.
+    ///
+    /// Example:
+    ///
+    /// ```rust
+    /// let motor: MotorFastDecay = Motor::new(&motor_conf, peripherals.GPIO1, peripherals.GPIO2)?;
+    /// ```
+    pub fn new<'a, M, A, B>(motor_config: &'a MotorConfig, gpio_a: A, gpio_b: B) -> Result<M, Error>
     where
         M: MotorInterface<'a>,
         A: PeripheralOutput<'a>,
         B: PeripheralOutput<'a>,
     {
-        let mut channel0 = driver.ledc.channel(channel::Number::Channel0, gpio_a);
+        let mut channel0 = motor_config.ledc.channel(channel::Number::Channel0, gpio_a);
         channel0.configure(channel::config::Config {
-            timer: &driver.timer,
+            timer: &motor_config.timer,
             duty_pct: 0,
             pin_config: channel::config::PinConfig::PushPull,
         })?;
 
-        let mut channel1 = driver.ledc.channel(channel::Number::Channel1, gpio_b);
+        let mut channel1 = motor_config.ledc.channel(channel::Number::Channel1, gpio_b);
         channel1.configure(channel::config::Config {
-            timer: &driver.timer,
+            timer: &motor_config.timer,
             duty_pct: 0,
             pin_config: channel::config::PinConfig::PushPull,
         })?;

@@ -2,6 +2,11 @@
 edition = "2021"
 name    = "esp-drv8833"
 version = "0.1.0"
+description = "A crate that provides control over the DRV8833 Dual H-Bridge Motor Driver"
+authors = ["nguterresn"]
+repository = "https://github.com/nguterresn/esp-drv8833"
+license = "MIT"
+readme = "README.md"
 
 [[bin]]
 name = "esp-drv8833"
@@ -9,8 +14,16 @@ path = "./src/bin/main.rs"
 
 [dependencies]
 critical-section = "1.2.0"
-esp-hal          = { version = "1.0.0-beta.0", features = ["esp32c6", "unstable"] }
-esp-println = { version = "0.14.0", features = ["esp32c6"] }
+esp-hal          = { version = "1.0.0-beta.1", features = ["unstable"] }
+
+[features]
+default = []
+esp32 = ["esp-hal/esp32"]
+esp32c3 = ["esp-hal/esp32c3"]
+esp32c6 = ["esp-hal/esp32c6"]
+esp32s2 = ["esp-hal/esp32s2"]
+esp32s3 = ["esp-hal/esp32s3"]
+esp32h2 = ["esp-hal/esp32h2"]
 
 [profile.dev]
 # Rust debug is too slow.

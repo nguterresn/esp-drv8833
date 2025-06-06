@@ -6,41 +6,14 @@ use esp_hal::clock::CpuClock;
 use esp_hal::ledc::{timer, LSGlobalClkSource, Ledc};
 use esp_hal::main;
 use esp_hal::time::{Duration, Instant, Rate};
-use esp_println::println;
-
-#[derive(Debug)]
-pub enum Error {
-    Other,
-    MCPWMError(esp_hal::mcpwm::FrequencyError),
-    LEDCTimerError(esp_hal::ledc::timer::Error),
-    LEDCChannelError(esp_hal::ledc::channel::Error),
-}
-
-impl From<esp_hal::mcpwm::FrequencyError> for Error {
-    fn from(error: esp_hal::mcpwm::FrequencyError) -> Self {
-        Error::MCPWMError(error)
-    }
-}
-
-impl From<esp_hal::ledc::timer::Error> for Error {
-    fn from(error: esp_hal::ledc::timer::Error) -> Self {
-        Error::LEDCTimerError(error)
-    }
-}
-
-impl From<esp_hal::ledc::channel::Error> for Error {
-    fn from(error: esp_hal::ledc::channel::Error) -> Self {
-        Error::LEDCChannelError(error)
-    }
-}
 
 #[panic_handler]
 fn panic(info: &core::panic::PanicInfo) -> ! {
-    println!(
-        "Panic! Mesage: {} location: {:?}",
-        info.message(),
-        info.location()
-    );
+    // println!(
+    //     "Panic! Mesage: {} location: {:?}",
+    //     info.message(),
+    //     info.location()
+    // );
     loop {}
 }
 
