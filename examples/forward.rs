@@ -8,12 +8,7 @@ use esp_hal::main;
 use esp_hal::time::{Duration, Instant, Rate};
 
 #[panic_handler]
-fn panic(info: &core::panic::PanicInfo) -> ! {
-    // println!(
-    //     "Panic! Mesage: {} location: {:?}",
-    //     info.message(),
-    //     info.location()
-    // );
+fn panic(_info: &core::panic::PanicInfo) -> ! {
     loop {}
 }
 

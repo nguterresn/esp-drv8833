@@ -1,5 +1,3 @@
-#![allow(dead_code)]
-
 use esp_hal::{
     gpio::interconnect::PeripheralOutput,
     ledc::{
