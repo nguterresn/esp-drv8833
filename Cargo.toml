@@ -1,7 +1,7 @@
 [package]
 edition = "2021"
 name    = "esp-drv8833"
-version = "0.1.0"
+version = "0.1.1"
 description = "A crate that provides control over the DRV8833 Dual H-Bridge Motor Driver"
 authors = ["nguterresn"]
 repository = "https://github.com/nguterresn/esp-drv8833"

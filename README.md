@@ -1,9 +1,3 @@
-# Build
-
-```BASH
-cargo build --example forward --features esp32c6
-```
-
 # About
 
 This crate provides control over the DRV8833 Dual H-Bridge Motor Driver.
@@ -57,4 +51,10 @@ motor.brake()?;
 
 ```rust
 let motor: MotorSlowDecay = Motor::new(&motor_conf, peripherals.GPIO1, peripherals.GPIO2)?;
+```
+
+# Build
+
+```BASH
+cargo build --example forward --features esp32c6
 ```
