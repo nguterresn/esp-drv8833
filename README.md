@@ -30,7 +30,11 @@ let motor_conf = MotorTimerConfig::new(
     Rate::from_khz(1),
 )?;
 
-let motor: MotorFastDecay = Motor::new(&motor_conf, peripherals.GPIO1, peripherals.GPIO2)?;
+let motor: MotorFastDecay = Motor::new(
+    &motor_conf,
+    MotorLink::new(channel::Number::Channel0, peripherals.GPIO1),
+    MotorLink::new(channel::Number::Channel1, peripherals.GPIO2)
+)?;
 
 motor.forward(100)?;
 ```
@@ -50,7 +54,27 @@ motor.brake()?;
 ### Setup a slow decay motor
 
 ```rust
-let motor: MotorSlowDecay = Motor::new(&motor_conf, peripherals.GPIO1, peripherals.GPIO2)?;
+let motor: MotorSlowDecay = Motor::new(
+    &motor_conf,
+    MotorLink::new(channel::Number::Channel0, peripherals.GPIO1),
+    MotorLink::new(channel::Number::Channel1, peripherals.GPIO2)
+)?;
+```
+
+### Setup two motors
+
+```rust
+// A channel number from 0-7;
+let motor_right: MotorFastDecay = Motor::new(
+    &motor_timer_conf,
+    MotorLink::new(channel::Number::Channel0, peripherals.GPIO1),
+    MotorLink::new(channel::Number::Channel1, peripherals.GPIO2),
+)?;
+let motor_left: MotorFastDecay = Motor::new(
+    &motor_timer_conf,
+    MotorLink::new(channel::Number::Channel2, peripherals.GPIO3),
+    MotorLink::new(channel::Number::Channel3, peripherals.GPIO4),
+)?;
 ```
 
 # Build

@@ -32,7 +32,11 @@
 //!     Rate::from_khz(1),
 //! )?;
 //!
-//! let motor: MotorFastDecay = Motor::new(&motor_conf, peripherals.GPIO1, peripherals.GPIO2)?;
+//! let motor: MotorFastDecay = Motor::new(
+//!     &motor_conf,
+//!     MotorLink::new(channel::Number::Channel0, peripherals.GPIO1),
+//!     MotorLink::new(channel::Number::Channel1, peripherals.GPIO2)
+//! )?;
 //!
 //! motor.forward(100)?;
 //! ```
@@ -52,13 +56,33 @@
 //! ### Setup a slow decay motor
 //!
 //! ```rust
-//! let motor: MotorSlowDecay = Motor::new(&motor_conf, peripherals.GPIO1, peripherals.GPIO2)?;
+//! let motor: MotorSlowDecay = Motor::new(
+//!     &motor_conf,
+//!     MotorLink::new(channel::Number::Channel0, peripherals.GPIO1),
+//!     MotorLink::new(channel::Number::Channel1, peripherals.GPIO2)
+//! )?;
+//! ```
+//!
+//! ### Setup two motors
+//!
+//! ```rust
+//! // A channel number from 0-7;
+//! let motor_right: MotorFastDecay = Motor::new(
+//!     &motor_timer_conf,
+//!     MotorLink::new(channel::Number::Channel0, peripherals.GPIO1),
+//!     MotorLink::new(channel::Number::Channel1, peripherals.GPIO2),
+//! )?;
+//! let motor_left: MotorFastDecay = Motor::new(
+//!     &motor_timer_conf,
+//!     MotorLink::new(channel::Number::Channel2, peripherals.GPIO3),
+//!     MotorLink::new(channel::Number::Channel3, peripherals.GPIO4),
+//! )?;
 //! ```
 
 pub mod drv8833;
 
 pub use drv8833::Motor;
-pub use drv8833::MotorTimerConfig;
 pub use drv8833::MotorFastDecay;
 pub use drv8833::MotorInterface;
 pub use drv8833::MotorSlowDecay;
+pub use drv8833::MotorTimerConfig;
