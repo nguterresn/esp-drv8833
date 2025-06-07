@@ -25,7 +25,7 @@
 //! let mut ledc = Ledc::new(peripherals.LEDC);
 //! ledc.set_global_slow_clock(LSGlobalClkSource::APBClk);
 //!
-//! let motor_conf = MotorConfig::new(
+//! let motor_conf = MotorTimerConfig::new(
 //!     &ledc,
 //!     timer::Number::Timer0,
 //!     timer::config::Duty::Duty12Bit,
@@ -58,7 +58,7 @@
 pub mod drv8833;
 
 pub use drv8833::Motor;
-pub use drv8833::MotorConfig;
+pub use drv8833::MotorTimerConfig;
 pub use drv8833::MotorFastDecay;
 pub use drv8833::MotorInterface;
 pub use drv8833::MotorSlowDecay;

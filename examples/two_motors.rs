@@ -32,14 +32,25 @@ fn main() -> ! {
     .expect("Failed to setup DRV8833");
 
     // A channel number from 0-7;
-    let motor: MotorFastDecay = Motor::new(
+    let motor_right: MotorFastDecay = Motor::new(
         &motor_timer_conf,
         MotorLink::new(channel::Number::Channel0, peripherals.GPIO1),
         MotorLink::new(channel::Number::Channel1, peripherals.GPIO2),
     )
     .expect("Failed to create motor right");
+    let motor_left: MotorFastDecay = Motor::new(
+        &motor_timer_conf,
+        MotorLink::new(channel::Number::Channel2, peripherals.GPIO3),
+        MotorLink::new(channel::Number::Channel3, peripherals.GPIO4),
+    )
+    .expect("Failed to create motor right");
 
-    motor.forward(100).expect("Failed to set duty cycle to 50%");
+    motor_right
+        .forward(50)
+        .expect("Failed to set duty cycle to 50%");
+    motor_left
+        .forward(100)
+        .expect("Failed to set duty cycle to 50%");
 
     loop {
         let delay_start = Instant::now();

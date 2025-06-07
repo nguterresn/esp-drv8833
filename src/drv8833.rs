@@ -2,7 +2,7 @@ use esp_hal::{
     gpio::interconnect::PeripheralOutput,
     ledc::{
         channel::{self, Channel, ChannelIFace},
-        timer::{self, config::Duty, Number, Timer, TimerIFace},
+        timer::{self, config::Duty, Timer, TimerIFace},
         Ledc, LowSpeed,
     },
     time::Rate,
@@ -26,12 +26,12 @@ impl From<esp_hal::ledc::timer::Error> for Error {
     }
 }
 
-pub struct MotorConfig<'a> {
+pub struct MotorTimerConfig<'a> {
     timer: Timer<'a, LowSpeed>,
     ledc: &'a Ledc<'a>,
 }
 
-impl<'a> MotorConfig<'a> {
+impl<'a> MotorTimerConfig<'a> {
     /// The Motor configuration requires the setting of the _slow clock_ in
     /// the LEDC peripheral.
     ///
@@ -49,7 +49,7 @@ impl<'a> MotorConfig<'a> {
     /// Example:
     ///
     /// ```rust
-    /// let motor_conf = MotorConfig::new(
+    /// let motor_conf = MotorTimerConfig::new(
     ///     &ledc,
     ///     timer::Number::Timer0,
     ///     timer::config::Duty::Duty12Bit,
@@ -58,7 +58,7 @@ impl<'a> MotorConfig<'a> {
     /// ```
     pub fn new(
         ledc: &'a Ledc<'a>,
-        timer: Number,
+        timer: timer::Number,
         duty: Duty,
         frequency: Rate,
     ) -> Result<Self, Error> {
@@ -76,10 +76,27 @@ impl<'a> MotorConfig<'a> {
     }
 }
 
+pub struct MotorLink<T>
+where
+    T: for<'any> PeripheralOutput<'any>,
+{
+    channel_num: channel::Number,
+    gpio: T,
+}
+
+impl<T> MotorLink<T>
+where
+    T: for<'any> PeripheralOutput<'any>,
+{
+    pub fn new(channel_num: channel::Number, gpio: T) -> Self {
+        Self { channel_num, gpio }
+    }
+}
+
 pub struct Motor;
 
 impl Motor {
-    /// This method links the motor configuration (MotorConfig) to the passed GPIOs, A and B.
+    /// This method links the motor configuration (MotorTimerConfig) to the passed GPIOs, A and B.
     ///
     /// It returns a Motor that implements the MotorInterface trait.
     ///
@@ -88,27 +105,35 @@ impl Motor {
     /// ```rust
     /// let motor: MotorFastDecay = Motor::new(&motor_conf, peripherals.GPIO1, peripherals.GPIO2)?;
     /// ```
-    pub fn new<'a, M, A, B>(motor_config: &'a MotorConfig, gpio_a: A, gpio_b: B) -> Result<M, Error>
+    pub fn new<'a, M, A, B>(
+        motor_config: &'a MotorTimerConfig,
+        motor_link_a: MotorLink<A>,
+        motor_link_b: MotorLink<B>,
+    ) -> Result<M, Error>
     where
         M: MotorInterface<'a>,
-        A: PeripheralOutput<'a>,
-        B: PeripheralOutput<'a>,
+        A: for<'any> PeripheralOutput<'any>,
+        B: for<'any> PeripheralOutput<'any>,
     {
-        let mut channel0 = motor_config.ledc.channel(channel::Number::Channel0, gpio_a);
-        channel0.configure(channel::config::Config {
+        let mut channel_a = motor_config
+            .ledc
+            .channel(motor_link_a.channel_num, motor_link_a.gpio);
+        channel_a.configure(channel::config::Config {
             timer: &motor_config.timer,
             duty_pct: 0,
             pin_config: channel::config::PinConfig::PushPull,
         })?;
 
-        let mut channel1 = motor_config.ledc.channel(channel::Number::Channel1, gpio_b);
-        channel1.configure(channel::config::Config {
+        let mut channel_b = motor_config
+            .ledc
+            .channel(motor_link_b.channel_num, motor_link_b.gpio);
+        channel_b.configure(channel::config::Config {
             timer: &motor_config.timer,
             duty_pct: 0,
             pin_config: channel::config::PinConfig::PushPull,
         })?;
 
-        Ok(M::new(channel0, channel1))
+        Ok(M::new(channel_a, channel_b))
     }
 }
 

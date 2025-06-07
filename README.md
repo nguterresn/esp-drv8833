@@ -23,7 +23,7 @@ let peripherals = esp_hal::init(config);
 let mut ledc = Ledc::new(peripherals.LEDC);
 ledc.set_global_slow_clock(LSGlobalClkSource::APBClk);
 
-let motor_conf = MotorConfig::new(
+let motor_conf = MotorTimerConfig::new(
     &ledc,
     timer::Number::Timer0,
     timer::config::Duty::Duty12Bit,
