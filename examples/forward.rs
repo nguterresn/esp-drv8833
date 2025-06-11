@@ -33,6 +33,7 @@ fn main() -> ! {
 
     // A channel number from 0-7;
     let motor: MotorFastDecay = Motor::new(
+        &ledc,
         &motor_timer_conf,
         MotorLink::new(channel::Number::Channel0, peripherals.GPIO1),
         MotorLink::new(channel::Number::Channel1, peripherals.GPIO2),

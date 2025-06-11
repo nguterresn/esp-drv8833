@@ -28,7 +28,6 @@ impl From<esp_hal::ledc::timer::Error> for Error {
 
 pub struct MotorTimerConfig<'a> {
     timer: Timer<'a, LowSpeed>,
-    ledc: &'a Ledc<'a>,
 }
 
 impl<'a> MotorTimerConfig<'a> {
@@ -69,10 +68,7 @@ impl<'a> MotorTimerConfig<'a> {
             frequency,
         })?;
 
-        Ok(Self {
-            ledc: ledc,
-            timer: lstimer,
-        })
+        Ok(Self { timer: lstimer })
     }
 }
 
@@ -106,6 +102,7 @@ impl Motor {
     /// let motor: MotorFastDecay = Motor::new(&motor_conf, peripherals.GPIO1, peripherals.GPIO2)?;
     /// ```
     pub fn new<'a, M, A, B>(
+        ledc: &'a Ledc<'a>,
         motor_config: &'a MotorTimerConfig,
         motor_link_a: MotorLink<A>,
         motor_link_b: MotorLink<B>,
@@ -115,18 +112,14 @@ impl Motor {
         A: for<'any> PeripheralOutput<'any>,
         B: for<'any> PeripheralOutput<'any>,
     {
-        let mut channel_a = motor_config
-            .ledc
-            .channel(motor_link_a.channel_num, motor_link_a.gpio);
+        let mut channel_a = ledc.channel(motor_link_a.channel_num, motor_link_a.gpio);
         channel_a.configure(channel::config::Config {
             timer: &motor_config.timer,
             duty_pct: 0,
             pin_config: channel::config::PinConfig::PushPull,
         })?;
 
-        let mut channel_b = motor_config
-            .ledc
-            .channel(motor_link_b.channel_num, motor_link_b.gpio);
+        let mut channel_b = ledc.channel(motor_link_b.channel_num, motor_link_b.gpio);
         channel_b.configure(channel::config::Config {
             timer: &motor_config.timer,
             duty_pct: 0,

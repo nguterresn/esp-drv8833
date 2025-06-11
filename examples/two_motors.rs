@@ -33,12 +33,14 @@ fn main() -> ! {
 
     // A channel number from 0-7;
     let motor_right: MotorFastDecay = Motor::new(
+        &ledc,
         &motor_timer_conf,
         MotorLink::new(channel::Number::Channel0, peripherals.GPIO1),
         MotorLink::new(channel::Number::Channel1, peripherals.GPIO2),
     )
     .expect("Failed to create motor right");
     let motor_left: MotorFastDecay = Motor::new(
+        &ledc,
         &motor_timer_conf,
         MotorLink::new(channel::Number::Channel2, peripherals.GPIO3),
         MotorLink::new(channel::Number::Channel3, peripherals.GPIO4),
