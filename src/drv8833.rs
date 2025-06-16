@@ -3,7 +3,7 @@ use esp_hal::{
     ledc::{
         channel::{self, Channel, ChannelIFace},
         timer::{self, config::Duty, Timer, TimerIFace},
-        Ledc, LowSpeed,
+        LSGlobalClkSource, Ledc, LowSpeed,
     },
     time::Rate,
 };
@@ -26,41 +26,17 @@ impl From<esp_hal::ledc::timer::Error> for Error {
     }
 }
 
-pub struct MotorTimerConfig<'a> {
-    timer: Timer<'a, LowSpeed>,
+pub struct MotorTimer<'a> {
+    pub timer: Timer<'a, LowSpeed>,
 }
 
-impl<'a> MotorTimerConfig<'a> {
-    /// The Motor configuration requires the setting of the _slow clock_ in
-    /// the LEDC peripheral.
-    ///
-    /// ```rust
-    /// let mut ledc = Ledc::new(peripherals.LEDC);
-    /// ledc.set_global_slow_clock(LSGlobalClkSource::APBClk);
-    /// ```
-    ///
-    /// Create the motor configuration by setting:
-    ///
-    /// * The timer, e.g. Timer0, Timer1, etc
-    /// * The duty cycle resolution, e.g. 8 bits
-    /// * The timer frequency as a Rate type, e.g. Rate::from_khz(20)
-    ///
-    /// Example:
-    ///
-    /// ```rust
-    /// let motor_conf = MotorTimerConfig::new(
-    ///     &ledc,
-    ///     timer::Number::Timer0,
-    ///     timer::config::Duty::Duty12Bit,
-    ///     Rate::from_khz(1),
-    /// )?;
-    /// ```
+impl<'a> MotorTimer<'a> {
     pub fn new(
         ledc: &'a Ledc<'a>,
         timer: timer::Number,
         duty: Duty,
         frequency: Rate,
-    ) -> Result<Self, Error> {
+    ) -> Result<MotorTimer<'a>, Error> {
         let mut lstimer = ledc.timer::<LowSpeed>(timer);
         lstimer.configure(timer::config::Config {
             duty,
@@ -68,7 +44,7 @@ impl<'a> MotorTimerConfig<'a> {
             frequency,
         })?;
 
-        Ok(Self { timer: lstimer })
+        Ok((Self { timer: lstimer }))
     }
 }
 
@@ -92,18 +68,18 @@ where
 pub struct Motor;
 
 impl Motor {
-    /// This method links the motor configuration (MotorTimerConfig) to the passed GPIOs, A and B.
+    /// This method links the previously configured timer and GPIOs, A and B.
     ///
     /// It returns a Motor that implements the MotorInterface trait.
     ///
     /// Example:
     ///
     /// ```rust
-    /// let motor: MotorFastDecay = Motor::new(&motor_conf, peripherals.GPIO1, peripherals.GPIO2)?;
+    /// let motor: MotorFastDecay = Motor::new(&timer, peripherals.GPIO1, peripherals.GPIO2)?;
     /// ```
     pub fn new<'a, M, A, B>(
         ledc: &'a Ledc<'a>,
-        motor_config: &'a MotorTimerConfig,
+        timer: &'a Timer<'a, LowSpeed>,
         motor_link_a: MotorLink<A>,
         motor_link_b: MotorLink<B>,
     ) -> Result<M, Error>
@@ -114,14 +90,14 @@ impl Motor {
     {
         let mut channel_a = ledc.channel(motor_link_a.channel_num, motor_link_a.gpio);
         channel_a.configure(channel::config::Config {
-            timer: &motor_config.timer,
+            timer: timer,
             duty_pct: 0,
             pin_config: channel::config::PinConfig::PushPull,
         })?;
 
         let mut channel_b = ledc.channel(motor_link_b.channel_num, motor_link_b.gpio);
         channel_b.configure(channel::config::Config {
-            timer: &motor_config.timer,
+            timer: timer,
             duty_pct: 0,
             pin_config: channel::config::PinConfig::PushPull,
         })?;

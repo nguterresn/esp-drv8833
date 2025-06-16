@@ -88,4 +88,4 @@ pub use drv8833::Motor;
 pub use drv8833::MotorFastDecay;
 pub use drv8833::MotorInterface;
 pub use drv8833::MotorSlowDecay;
-pub use drv8833::MotorTimerConfig;
+pub use drv8833::MotorTimer;

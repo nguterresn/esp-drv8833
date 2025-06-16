@@ -2,7 +2,7 @@
 #![no_main]
 
 use esp_drv8833::drv8833::MotorLink;
-use esp_drv8833::{Motor, MotorFastDecay, MotorInterface, MotorTimerConfig};
+use esp_drv8833::{Motor, MotorFastDecay, MotorInterface, MotorTimer};
 use esp_hal::clock::CpuClock;
 use esp_hal::ledc::{channel, timer, LSGlobalClkSource, Ledc};
 use esp_hal::main;
@@ -23,36 +23,31 @@ fn main() -> ! {
     let mut ledc = Ledc::new(peripherals.LEDC);
     ledc.set_global_slow_clock(LSGlobalClkSource::APBClk);
 
-    let motor_timer_conf = MotorTimerConfig::new(
+    let motor_timer_conf = MotorTimer::new(
         &ledc,
         timer::Number::Timer0,
         timer::config::Duty::Duty12Bit,
         Rate::from_khz(1),
     )
-    .expect("Failed to setup DRV8833");
+    .unwrap();
 
-    // A channel number from 0-7;
     let motor_right: MotorFastDecay = Motor::new(
         &ledc,
-        &motor_timer_conf,
+        &motor_timer_conf.timer,
         MotorLink::new(channel::Number::Channel0, peripherals.GPIO1),
         MotorLink::new(channel::Number::Channel1, peripherals.GPIO2),
     )
-    .expect("Failed to create motor right");
+    .unwrap();
     let motor_left: MotorFastDecay = Motor::new(
         &ledc,
-        &motor_timer_conf,
+        &motor_timer_conf.timer,
         MotorLink::new(channel::Number::Channel2, peripherals.GPIO3),
         MotorLink::new(channel::Number::Channel3, peripherals.GPIO4),
     )
-    .expect("Failed to create motor right");
+    .unwrap();
 
-    motor_right
-        .forward(50)
-        .expect("Failed to set duty cycle to 50%");
-    motor_left
-        .forward(100)
-        .expect("Failed to set duty cycle to 50%");
+    motor_right.forward(100).unwrap();
+    motor_left.forward(50).unwrap();
 
     loop {
         let delay_start = Instant::now();
