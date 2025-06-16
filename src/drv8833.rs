@@ -3,7 +3,7 @@ use esp_hal::{
     ledc::{
         channel::{self, Channel, ChannelIFace},
         timer::{self, config::Duty, Timer, TimerIFace},
-        LSGlobalClkSource, Ledc, LowSpeed,
+        Ledc, LowSpeed,
     },
     time::Rate,
 };
@@ -44,7 +44,7 @@ impl<'a> MotorTimer<'a> {
             frequency,
         })?;
 
-        Ok((Self { timer: lstimer }))
+        Ok(Self { timer: lstimer })
     }
 }
 

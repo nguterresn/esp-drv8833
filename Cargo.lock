@@ -347,7 +347,7 @@ dependencies = [
 
 [[package]]
 name = "esp-drv8833"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "critical-section",
  "esp-hal",
