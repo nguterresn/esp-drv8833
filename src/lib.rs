@@ -89,3 +89,4 @@ pub use drv8833::MotorFastDecay;
 pub use drv8833::MotorInterface;
 pub use drv8833::MotorSlowDecay;
 pub use drv8833::MotorTimer;
+pub use drv8833::Stepper;

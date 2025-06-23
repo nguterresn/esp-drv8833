@@ -1,5 +1,6 @@
 use esp_hal::{
-    gpio::interconnect::PeripheralOutput,
+    delay::Delay,
+    gpio::{interconnect::PeripheralOutput, Level, Output, OutputConfig, OutputPin},
     ledc::{
         channel::{self, Channel, ChannelIFace},
         timer::{self, config::Duty, Timer, TimerIFace},
@@ -174,5 +175,90 @@ impl<'a> MotorInterface<'a> for MotorSlowDecay<'a> {
         self.b.set_duty(100)?;
 
         Ok(())
+    }
+}
+
+pub struct Stepper<'a> {
+    a_plus: Output<'a>,
+    a_minus: Output<'a>,
+    b_plus: Output<'a>,
+    b_minus: Output<'a>,
+    frequency: Rate,
+    steps_per_rev: u32,
+    step: usize,
+    sequence: [[Level; 4]; 4],
+}
+
+impl<'a> Stepper<'a> {
+    pub fn new<A, B, C, D>(
+        pin_a_plus: A,
+        pin_a_minus: B,
+        pin_b_plus: C,
+        pin_b_minus: D,
+        frequency: Rate,
+        steps_per_rev: u32,
+    ) -> Self
+    where
+        A: OutputPin + 'a,
+        B: OutputPin + 'a,
+        C: OutputPin + 'a,
+        D: OutputPin + 'a,
+    {
+        let config = OutputConfig::default();
+
+        let a_plus = Output::new(pin_a_plus, esp_hal::gpio::Level::Low, config);
+        let a_minus = Output::new(pin_a_minus, esp_hal::gpio::Level::Low, config);
+        let b_plus = Output::new(pin_b_plus, esp_hal::gpio::Level::Low, config);
+        let b_minus = Output::new(pin_b_minus, esp_hal::gpio::Level::Low, config);
+
+        Self {
+            a_plus,
+            a_minus,
+            b_plus,
+            b_minus,
+            frequency,
+            steps_per_rev,
+            step: 0,
+            sequence: [
+                [Level::High, Level::Low, Level::High, Level::Low],
+                [Level::Low, Level::High, Level::High, Level::Low],
+                [Level::Low, Level::High, Level::Low, Level::High],
+                [Level::High, Level::Low, Level::Low, Level::High],
+            ],
+        }
+    }
+
+    pub fn angle(&mut self, angle: f32, delay: &Delay) {
+        let times = ((angle / 360.0) * self.steps_per_rev as f32) as i32;
+        let period = self.frequency.as_duration().as_micros();
+
+        if times > 0 {
+            for _ in 0..times {
+                self.step_forward();
+                delay.delay_micros(period as u32);
+            }
+        } else {
+            for _ in 0..(times.abs()) {
+                self.step_backward();
+                delay.delay_micros(period as u32);
+            }
+        }
+    }
+
+    pub fn step_forward(&mut self) {
+        self.step = (self.step + 1) % 4;
+        self.output(self.sequence[self.step]);
+    }
+
+    pub fn step_backward(&mut self) {
+        self.step = (self.step - 1 + 4) % 4;
+        self.output(self.sequence[self.step]);
+    }
+
+    fn output(&mut self, seq: [Level; 4]) {
+        self.a_plus.set_level(seq[0]);
+        self.a_minus.set_level(seq[1]);
+        self.b_plus.set_level(seq[2]);
+        self.b_minus.set_level(seq[3]);
     }
 }

@@ -1,6 +1,6 @@
 [package]
 edition = "2021"
-name    = "esp-drv8833"
+name = "esp-drv8833"
 version = "0.1.5"
 description = "A crate that provides control over the DRV8833 Dual H-Bridge Motor Driver"
 authors = ["nguterresn"]
@@ -12,7 +12,7 @@ categories = ["embedded", "hardware-support", "no-std"]
 
 [dependencies]
 critical-section = "1.2.0"
-esp-hal          = { version = "1.0.0-beta.1", features = ["unstable"] }
+esp-hal = { version = "1.0.0-beta.1", features = ["unstable"] }
 
 [features]
 default = []
@@ -29,10 +29,10 @@ esp32h2 = ["esp-hal/esp32h2"]
 opt-level = "s"
 
 [profile.release]
-codegen-units    = 1     # LLVM can perform better optimizations using a single thread
-debug            = 2
+codegen-units = 1        # LLVM can perform better optimizations using a single thread
+debug = 2
 debug-assertions = false
-incremental      = false
-lto              = 'fat'
-opt-level        = 's'
-overflow-checks  = false
+incremental = false
+lto = 'fat'
+opt-level = 's'
+overflow-checks = false
