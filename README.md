@@ -31,6 +31,7 @@ let motor_conf = MotorTimerConfig::new(
 )?;
 
 let motor: MotorFastDecay = Motor::new(
+    &ledc,
     &motor_conf,
     MotorLink::new(channel::Number::Channel0, peripherals.GPIO1),
     MotorLink::new(channel::Number::Channel1, peripherals.GPIO2)
@@ -55,6 +56,7 @@ motor.brake()?;
 
 ```rust
 let motor: MotorSlowDecay = Motor::new(
+    &ledc,
     &motor_conf,
     MotorLink::new(channel::Number::Channel0, peripherals.GPIO1),
     MotorLink::new(channel::Number::Channel1, peripherals.GPIO2)
@@ -66,15 +68,38 @@ let motor: MotorSlowDecay = Motor::new(
 ```rust
 // A channel number from 0-7;
 let motor_right: MotorFastDecay = Motor::new(
+    &ledc,
     &motor_timer_conf,
     MotorLink::new(channel::Number::Channel0, peripherals.GPIO1),
     MotorLink::new(channel::Number::Channel1, peripherals.GPIO2),
 )?;
 let motor_left: MotorFastDecay = Motor::new(
+    &ledc,
     &motor_timer_conf,
     MotorLink::new(channel::Number::Channel2, peripherals.GPIO3),
     MotorLink::new(channel::Number::Channel3, peripherals.GPIO4),
 )?;
+```
+
+### Setup a stepper motor
+
+```rust
+let config = esp_hal::Config::default().with_cpu_clock(CpuClock::max());
+let peripherals = esp_hal::init(config);
+
+let mut stepper = Stepper::new(
+    peripherals.GPIO0,
+    peripherals.GPIO1,
+    peripherals.GPIO10,
+    peripherals.GPIO9,
+    Rate::from_hz(200), // 200hz, i.e. 5ms
+    200, // steps per rev
+);
+
+let delay = Delay::new();
+loop {
+    stepper.angle(30.0, &delay);
+}
 ```
 
 # Build
